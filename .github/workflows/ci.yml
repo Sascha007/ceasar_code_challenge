@@ -1,0 +1,94 @@
+name: Tests & Shared Hosting Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      sqlite:
+        image: nouchka/sqlite3:latest
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, mbstring, xml, gd
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Create Database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Generate key
+        run: php artisan key:generate
+
+      - name: Execute tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test
+
+  shared-hosting-check:
+    name: Shared Hosting Compatibility Check
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, mbstring, xml, gd
+          coverage: none
+
+      - name: Install Production Dependencies
+        run: composer install --no-dev -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Create Database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Generate key
+        run: php artisan key:generate
+
+      - name: Cache Configuration
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+      - name: Start Built-in Server
+        run: php -S localhost:8000 -t public &
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+
+      - name: Wait for Server
+        run: sleep 3
+
+      - name: Test Homepage
+        run: curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/
+
+      - name: Test Static Assets
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/favicon.ico
+          curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/robots.txt
