@@ -37,7 +37,7 @@ class Team extends Model
      */
     public function puzzle(): HasOne
     {
-        return $this->hasOne(Puzzle::class);
+        return $this->hasOne(Puzzle::class, 'team_id');
     }
 
     /**
@@ -74,17 +74,47 @@ class Team extends Model
      */
     public function recordAttempt(string $submission): bool
     {
-        if ($this->isSolved() || $this->competition->status !== Competition::STATUS_RUNNING) {
+        $this->loadMissing(['competition', 'puzzle']);
+
+        if ($this->isSolved()) {
+            \Log::debug('Team is already solved');
             return false;
         }
 
-        $this->attempts++;
-        $this->save();
+        if ($this->competition->status !== Competition::STATUS_RUNNING) {
+            \Log::debug('Competition status is not running: ' . $this->competition->status);
+            return false;
+        }
 
-        return $this->submissions()->create([
-            'content' => $submission,
-            'is_correct' => $this->puzzle->validateSolution($submission),
-        ])->is_correct;
+        if (!$this->puzzle) {
+            \Log::debug('No puzzle found for team');
+            return false;
+        }
+
+        $isCorrect = $this->puzzle->validateSolution($submission);
+        \Log::debug('Solution validation result:', [
+            'submission' => $submission,
+            'isCorrect' => $isCorrect,
+            'plaintext' => $this->puzzle->plaintext
+        ]);
+
+        try {
+            $submissionModel = $this->submissions()->create([
+                'content' => $submission,
+                'is_correct' => $isCorrect,
+            ]);
+
+            $this->increment('attempts');
+
+            if ($isCorrect) {
+                $this->update(['solved_at' => now()]);
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('Failed to create submission: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**

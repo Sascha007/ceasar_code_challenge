@@ -45,6 +45,8 @@ class CompetitionFlowTest extends TestCase
             'plaintext' => 'Hello World',
             'shift' => 3,
         ]);
+        $this->puzzle1->generateCiphertext();
+        $this->puzzle1->save();
 
         $this->puzzle2 = Puzzle::create([
             'competition_id' => $this->competition->id,
@@ -52,43 +54,127 @@ class CompetitionFlowTest extends TestCase
             'plaintext' => 'Test Message',
             'shift' => 5,
         ]);
+        $this->puzzle2->generateCiphertext();
+        $this->puzzle2->save();
     }
 
-    public function test_competition_flow(): void
+    public function test_competition_starts_in_draft_status(): void
     {
-        // Initially competition is in draft status
         $this->assertEquals(Competition::STATUS_DRAFT, $this->competition->status);
+    }
 
-        // Set competition to ready
+    public function test_teams_can_mark_themselves_as_ready(): void
+    {
         $this->competition->update(['status' => Competition::STATUS_READY]);
-
-        // Teams can mark themselves as ready
+        
         $this->team1->markReady();
         $this->team2->markReady();
 
         $this->assertTrue($this->team1->isReady());
         $this->assertTrue($this->team2->isReady());
+    }
 
-        // Start the competition
+    public function test_competition_can_be_started(): void
+    {
+        $this->competition->update(['status' => Competition::STATUS_READY]);
+        $this->team1->markReady();
+        $this->team2->markReady();
+
         $this->assertTrue($this->competition->canStart());
         $this->competition->start();
+        $this->competition->refresh();
 
         $this->assertEquals(Competition::STATUS_RUNNING, $this->competition->status);
         $this->assertNotNull($this->competition->started_at);
+    }
 
-        // Team 1 makes incorrect submission
+    public function test_team_can_make_incorrect_submission(): void
+    {
+        $this->competition->update(['status' => Competition::STATUS_READY]);
+        $this->team1->markReady();
+        $this->team2->markReady();
+        $startResult = $this->competition->start();
+        $this->assertTrue($startResult, 'Competition should start successfully');
+        
+        // Reload all relationships
+        $this->competition->refresh();
+        $this->team1->refresh();
+        $this->team1->load('competition', 'puzzle');
+
+        $this->assertEquals(Competition::STATUS_RUNNING, $this->competition->status, 'Competition should be in running state');
+        $this->assertFalse($this->team1->isSolved(), 'Team should not be solved initially');
+        $puzzle = $this->team1->puzzle()->first();
+        \Log::info('Team puzzle:', ['puzzle' => $puzzle]);
+        $this->assertNotNull($puzzle, 'Team should have a puzzle');
+        
+        // Verify puzzle content
+        $this->assertEquals('Hello World', $puzzle->plaintext, 'Puzzle should have correct plaintext');
+        $this->assertTrue($puzzle->validateSolution('Hello World'), 'Puzzle should validate correct solution');
+        $this->assertFalse($puzzle->validateSolution('Wrong Answer'), 'Puzzle should reject wrong solution');
         $wrongAnswer = 'Wrong Answer';
-        $this->assertFalse($this->team1->recordAttempt($wrongAnswer));
+        $result = $this->team1->recordAttempt($wrongAnswer);
+        $this->assertTrue($result, 'recordAttempt should return true');
+        $this->team1->refresh();
+        
+        $submission = $this->team1->submissions()->latest()->first();
+        $this->assertNotNull($submission, 'Submission should be created');
+        $this->assertFalse($submission->is_correct);
         $this->assertEquals(1, $this->team1->attempts);
         $this->assertNull($this->team1->solved_at);
+    }
 
-        // Team 1 makes correct submission
-        $this->assertTrue($this->team1->recordAttempt('Hello World'));
-        $this->assertEquals(2, $this->team1->attempts);
-        $this->assertNotNull($this->team1->solved_at);
+    public function test_team_can_make_correct_submission(): void
+    {
+        $this->competition->update(['status' => Competition::STATUS_READY]);
+        $this->team1->markReady();
+        $this->team2->markReady();
+        
+        $startResult = $this->competition->start();
+        $this->assertTrue($startResult, 'Competition should start successfully');
+        
+        // Reload all relationships
+        $this->competition->refresh();
+        $this->team1->refresh();
+        $this->team1->load('competition', 'puzzle');
+        
+        $this->assertEquals(Competition::STATUS_RUNNING, $this->competition->status, 'Competition should be in running state');
+        $this->assertFalse($this->team1->isSolved(), 'Team should not be solved initially');
+        
+        $puzzle = $this->team1->puzzle()->first();
+        $this->assertNotNull($puzzle, 'Team should have a puzzle');
+        $this->assertEquals('Hello World', $puzzle->plaintext, 'Puzzle should have correct plaintext');
+        
+        $result = $this->team1->recordAttempt('Hello World');
+        $this->assertTrue($result, 'recordAttempt should return true');
+        
+        $this->team1->refresh();
+        $submission = $this->team1->submissions()->latest()->first();
+        
+        $this->assertNotNull($submission, 'Submission should be created');
+        $this->assertTrue($submission->is_correct, 'Submission should be marked as correct');
+        $this->assertEquals(1, $this->team1->attempts, 'Should have one attempt');
+        $this->assertNotNull($this->team1->solved_at, 'Should be marked as solved');
 
         // Team 2 makes correct submission in first try
-        $this->assertTrue($this->team2->recordAttempt('Test Message'));
+        $this->team2->refresh();
+        $this->team2->load('competition', 'puzzle');
+        
+        $result = $this->team2->recordAttempt('Test Message');
+        $this->assertTrue($result, 'Team 2 recordAttempt should return true');
+        
+        $this->team2->refresh();
+        $submission = $this->team2->submissions()->latest()->first();
+        $this->assertNotNull($submission, 'Team 2 submission should be created');
+        $this->assertTrue($submission->is_correct, 'Team 2 submission should be marked as correct');
+        $this->assertEquals(1, $this->team2->attempts, 'Team 2 should have one attempt');
+        $this->assertNotNull($this->team2->solved_at, 'Team 2 should be marked as solved');
+
+        // Team 2 makes correct submission in first try
+        $this->team2->recordAttempt('Test Message');
+        $this->team2->refresh();
+        $submission = $this->team2->submissions()->latest()->first();
+        $this->assertNotNull($submission);
+        $this->assertTrue($submission->is_correct);
         $this->assertEquals(1, $this->team2->attempts);
         $this->assertNotNull($this->team2->solved_at);
 

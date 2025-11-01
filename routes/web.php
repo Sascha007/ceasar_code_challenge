@@ -6,6 +6,16 @@ use App\Http\Controllers\TeamController;
 use App\Livewire\Admin\AdminDashboard;
 use Illuminate\Support\Facades\Route;
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+    
+    Route::get('/profile', function () {
+        return view('profile');
+    })->name('profile');
+});
+
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/', AdminDashboard::class)->name('admin.dashboard');
     Route::get('/teams/qr-codes', [AdminController::class, 'downloadTeamQrCodes'])->name('admin.teams.qr-codes');
@@ -18,5 +28,10 @@ Route::get('/events/competition/{competition}', [StatusController::class, 'event
 // Team routes
 Route::get('/t/{team:slug}', [TeamController::class, 'show'])->name('team.show');
 Route::post('/t/{team:slug}/submit', [TeamController::class, 'submit'])->name('team.submit');
+
+// Welcome route
+Route::get('/', function () {
+    return view('welcome');
+});
 
 require __DIR__.'/auth.php';

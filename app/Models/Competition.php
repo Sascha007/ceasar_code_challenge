@@ -60,9 +60,16 @@ class Competition extends Model
             return false;
         }
 
-        $this->status = self::STATUS_RUNNING;
-        $this->started_at = now();
-        return $this->save();
+        $started = $this->update([
+            'status' => self::STATUS_RUNNING,
+            'started_at' => now()
+        ]);
+
+        if ($started) {
+            $this->refresh();
+        }
+
+        return $started;
     }
 
     /**

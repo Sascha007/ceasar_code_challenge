@@ -48,10 +48,10 @@ class Puzzle extends Model
     /**
      * Validate a submitted solution.
      */
-    public function validateSolution(string $submission): bool
+    public function validateSolution(string $solution): bool
     {
-        $caesarService = new CaesarService();
-        return $caesarService->validate($submission, $this->plaintext);
+        // Trim both strings and compare case-insensitive
+        return strtolower(trim($solution)) === strtolower(trim($this->plaintext));
     }
 
     /**
