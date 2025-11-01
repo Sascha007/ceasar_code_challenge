@@ -81,9 +81,50 @@ class Competition extends Model
             return false;
         }
 
-        $this->status = self::STATUS_FINISHED;
-        $this->finished_at = now();
-        return $this->save();
+        return $this->update([
+            'status' => self::STATUS_FINISHED,
+            'finished_at' => now()
+        ]);
+    }
+
+    /**
+     * Check if all teams have solved their puzzles.
+     */
+    public function checkAllTeamsSolved(): bool
+    {
+        if ($this->status !== self::STATUS_RUNNING) {
+            \Log::debug('Competition not running, status: ' . $this->status);
+            return false;
+        }
+
+        $totalTeams = $this->teams()->count();
+        $solvedTeams = $this->teams()->whereNotNull('solved_at')->count();
+
+        \Log::debug('Checking teams solved status', [
+            'total' => $totalTeams,
+            'solved' => $solvedTeams
+        ]);
+
+        $allSolved = ($totalTeams > 0 && $totalTeams === $solvedTeams);
+
+        if ($allSolved) {
+            \Log::debug('All teams solved, finishing competition');
+            $this->finish();
+        }
+
+        return $allSolved;
+    }
+
+    /**
+     * Get team rankings based on solve time and number of attempts.
+     */
+    public function getRankings()
+    {
+        return $this->teams()
+            ->whereNotNull('solved_at')
+            ->orderBy('solved_at')
+            ->orderBy('attempts')
+            ->get();
     }
 
     /**

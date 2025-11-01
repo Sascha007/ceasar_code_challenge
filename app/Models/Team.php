@@ -108,6 +108,7 @@ class Team extends Model
 
             if ($isCorrect) {
                 $this->update(['solved_at' => now()]);
+                $this->competition->checkAllTeamsSolved();
             }
 
             return true;

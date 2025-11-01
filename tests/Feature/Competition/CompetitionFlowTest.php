@@ -168,6 +168,65 @@ class CompetitionFlowTest extends TestCase
         $this->assertTrue($submission->is_correct, 'Team 2 submission should be marked as correct');
         $this->assertEquals(1, $this->team2->attempts, 'Team 2 should have one attempt');
         $this->assertNotNull($this->team2->solved_at, 'Team 2 should be marked as solved');
+    }
+
+    public function test_competition_ends_when_all_teams_solved(): void
+    {
+        // Set up and start competition
+        $this->competition->update(['status' => Competition::STATUS_READY]);
+        $this->team1->markReady();
+        $this->team2->markReady();
+        
+        $startResult = $this->competition->start();
+        $this->assertTrue($startResult, 'Competition should start successfully');
+        
+        // Refresh all models
+        $this->competition->refresh();
+        $this->team1->refresh();
+        $this->team2->refresh();
+        
+        // Load relationships
+        $this->team1->load('competition', 'puzzle');
+        $this->team2->load('competition', 'puzzle');
+        
+        // Both teams solve their puzzles
+        $result1 = $this->team1->recordAttempt('Hello World');
+        $this->assertTrue($result1, 'Team 1 should be able to submit solution');
+        
+        $result2 = $this->team2->recordAttempt('Test Message');
+        $this->assertTrue($result2, 'Team 2 should be able to submit solution');
+        
+        // Refresh models
+        $this->competition->refresh();
+        $this->team1->refresh();
+        $this->team2->refresh();
+        
+        $this->team1->load('competition');
+        $this->team2->load('competition');
+        
+        // Verify both teams have solved their puzzles
+        $this->assertTrue($this->team1->isSolved(), 'Team 1 should be solved');
+        $this->assertTrue($this->team2->isSolved(), 'Team 2 should be solved');
+        
+        // Competition should be finished
+        $this->assertEquals(Competition::STATUS_FINISHED, $this->competition->status, 'Competition should be finished');
+        $this->assertNotNull($this->competition->finished_at, 'Competition should have finish time');
+        
+        // Verify rankings
+        $rankings = $this->competition->getRankings();
+        $this->assertCount(2, $rankings, 'Should have rankings for both teams');
+        
+        // First place should be determined by solve time and attempts
+        $firstPlace = $rankings->first();
+        $this->assertNotNull($firstPlace, 'Should have a first place');
+        $this->assertNotNull($firstPlace->solved_at, 'First place should have solve time');
+        $this->assertEquals(1, $firstPlace->attempts, 'First place should have only one attempt');
+        
+        // Rankings should be ordered by solve time and attempts
+        $this->assertTrue(
+            $rankings->first()->solved_at <= $rankings->last()->solved_at,
+            'Rankings should be ordered by solve time'
+        );
 
         // Team 2 makes correct submission in first try
         $this->team2->recordAttempt('Test Message');
