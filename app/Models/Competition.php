@@ -110,6 +110,7 @@ class Competition extends Model
         if ($allSolved) {
             \Log::debug('All teams solved, finishing competition');
             $this->finish();
+            $this->refresh();  // Stellen Sie sicher, dass wir den aktuellen Status haben
         }
 
         return $allSolved;

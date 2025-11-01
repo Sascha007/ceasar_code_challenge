@@ -81,7 +81,7 @@ class Team extends Model
             return false;
         }
 
-        if ($this->competition->status !== Competition::STATUS_RUNNING) {
+        if ($this->competition->refresh()->status !== Competition::STATUS_RUNNING) {
             \Log::debug('Competition status is not running: ' . $this->competition->status);
             return false;
         }
