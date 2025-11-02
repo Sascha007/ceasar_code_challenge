@@ -12,7 +12,7 @@ class CaesarServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CaesarService();
+        $this->service = new CaesarService;
     }
 
     /**
@@ -33,38 +33,38 @@ class CaesarServiceTest extends TestCase
             'simple shift by 1' => [
                 'ABC',
                 1,
-                'BCD'
+                'BCD',
             ],
             'wrap around Z' => [
                 'XYZ',
                 1,
-                'YZA'
+                'YZA',
             ],
             'preserve case' => [
                 'Hello World',
                 1,
-                'Ifmmp Xpsme'
+                'Ifmmp Xpsme',
             ],
             'preserve special chars' => [
                 'Hello, World!',
                 1,
-                'Ifmmp, Xpsme!'
+                'Ifmmp, Xpsme!',
             ],
             'negative shift' => [
                 'ABC',
                 -1,
-                'ZAB'
+                'ZAB',
             ],
             'shift more than 26' => [
                 'ABC',
                 27,
-                'BCD'
+                'BCD',
             ],
             'empty string' => [
                 '',
                 1,
-                ''
-            ]
+                '',
+            ],
         ];
     }
 
@@ -86,23 +86,23 @@ class CaesarServiceTest extends TestCase
             'exact match' => [
                 'Hello World',
                 'Hello World',
-                true
+                true,
             ],
             'case insensitive' => [
                 'HELLO WORLD',
                 'hello world',
-                true
+                true,
             ],
             'trim whitespace' => [
                 ' Hello World ',
                 'Hello World',
-                true
+                true,
             ],
             'wrong text' => [
                 'Wrong Answer',
                 'Hello World',
-                false
-            ]
+                false,
+            ],
         ];
     }
 

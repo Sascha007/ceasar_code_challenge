@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Status;
 use App\Http\Controllers\Controller;
 use App\Models\Competition;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class StatusController extends Controller
@@ -45,7 +44,7 @@ class StatusController extends Controller
      */
     public function events(Request $request, Competition $competition): Response
     {
-        $response = new Response();
+        $response = new Response;
         $response->headers->set('Content-Type', 'text/event-stream');
         $response->headers->set('Cache-Control', 'no-cache');
         $response->headers->set('Connection', 'keep-alive');
@@ -53,7 +52,7 @@ class StatusController extends Controller
 
         $response->setCallback(function () use ($competition) {
             while (true) {
-                echo "data: " . json_encode([
+                echo 'data: '.json_encode([
                     'teams' => $competition->teams()
                         ->with('puzzle', 'submissions')
                         ->get()
@@ -71,8 +70,8 @@ class StatusController extends Controller
                             ['time', 'asc'],
                             ['attempts', 'asc'],
                             ['name', 'asc'],
-                        ])
-                ]) . "\n\n";
+                        ]),
+                ])."\n\n";
 
                 ob_flush();
                 flush();

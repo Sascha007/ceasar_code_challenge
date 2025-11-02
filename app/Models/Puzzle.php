@@ -41,7 +41,7 @@ class Puzzle extends Model
      */
     public function generateCiphertext(): void
     {
-        $caesarService = new CaesarService();
+        $caesarService = new CaesarService;
         $this->ciphertext = $caesarService->encode($this->plaintext, $this->shift);
     }
 

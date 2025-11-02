@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Team;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
-use App\Models\Team;
-use Illuminate\Support\Collection;
 use Dompdf\Dompdf;
+use Illuminate\Support\Collection;
 
 class QrCodeService
 {
@@ -22,6 +22,7 @@ class QrCodeService
         ]);
 
         $qrCode = new QRCode($options);
+
         return $qrCode->render(route('team.show', $team->slug));
     }
 
@@ -30,17 +31,18 @@ class QrCodeService
      */
     public function generateQrCodesPdf(array $qrCodes): \Illuminate\Http\Response
     {
-        $dompdf = new Dompdf();
+        $dompdf = new Dompdf;
         $html = view('admin.qr-codes-pdf', ['qrCodes' => $qrCodes])->render();
-        
+
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4');
         $dompdf->render();
-        
+
         return response($dompdf->output())
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="team-qr-codes.pdf"');
     }
+
     public function generateTeamQrPdf(Collection $teams): string
     {
         $html = view('admin.qr-codes-pdf', [
@@ -53,7 +55,7 @@ class QrCodeService
             }),
         ])->render();
 
-        $dompdf = new Dompdf();
+        $dompdf = new Dompdf;
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4');
         $dompdf->render();

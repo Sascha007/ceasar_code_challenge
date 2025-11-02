@@ -53,7 +53,7 @@ class Team extends Model
      */
     public function isReady(): bool
     {
-        return !is_null($this->ready_at);
+        return ! is_null($this->ready_at);
     }
 
     /**
@@ -66,6 +66,7 @@ class Team extends Model
         }
 
         $this->ready_at = now();
+
         return $this->save();
     }
 
@@ -78,16 +79,19 @@ class Team extends Model
 
         if ($this->isSolved()) {
             \Log::debug('Team is already solved');
+
             return false;
         }
 
         if ($this->competition->refresh()->status !== Competition::STATUS_RUNNING) {
-            \Log::debug('Competition status is not running: ' . $this->competition->status);
+            \Log::debug('Competition status is not running: '.$this->competition->status);
+
             return false;
         }
 
-        if (!$this->puzzle) {
+        if (! $this->puzzle) {
             \Log::debug('No puzzle found for team');
+
             return false;
         }
 
@@ -95,7 +99,7 @@ class Team extends Model
         \Log::debug('Solution validation result:', [
             'submission' => $submission,
             'isCorrect' => $isCorrect,
-            'plaintext' => $this->puzzle->plaintext
+            'plaintext' => $this->puzzle->plaintext,
         ]);
 
         try {
@@ -113,7 +117,8 @@ class Team extends Model
 
             return true;
         } catch (\Exception $e) {
-            \Log::error('Failed to create submission: ' . $e->getMessage());
+            \Log::error('Failed to create submission: '.$e->getMessage());
+
             return false;
         }
     }
@@ -123,7 +128,7 @@ class Team extends Model
      */
     public function isSolved(): bool
     {
-        return !is_null($this->solved_at);
+        return ! is_null($this->solved_at);
     }
 
     /**
@@ -136,6 +141,7 @@ class Team extends Model
         }
 
         $this->solved_at = now();
+
         return $this->save();
     }
 }
