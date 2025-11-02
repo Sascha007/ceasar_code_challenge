@@ -1,5 +1,9 @@
 <div class="p-6">
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Competition Management Section -->
+        <livewire:admin.competition-management />
+
+        <!-- Team Management Section -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
                 <div class="flex justify-between items-center mb-4">
