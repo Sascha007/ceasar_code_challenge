@@ -1,3 +1,4 @@
+<div>
 <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl border border-gray-200">
     <div class="p-8 bg-gradient-to-r from-blue-600 to-blue-700">
         <!-- Header -->
@@ -239,3 +240,4 @@
         animation: slide-up 0.3s ease-out;
     }
 </style>
+</div>
