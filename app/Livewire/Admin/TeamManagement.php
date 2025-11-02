@@ -119,7 +119,17 @@ class TeamManagement extends Component
     {
         if (! empty($this->display_name)) {
             $baseSlug = Str::slug($this->display_name);
-            $this->slug = $baseSlug.'-'.rand(1000, 9999);
+            $uniqueId = substr(uniqid(), -4);
+            $this->slug = $baseSlug.'-'.$uniqueId;
+
+            // Ensure uniqueness
+            $counter = 1;
+            $originalSlug = $this->slug;
+            while (Team::where('slug', $this->slug)->when($this->selectedTeam, function ($query) {
+                return $query->where('id', '!=', $this->selectedTeam);
+            })->exists()) {
+                $this->slug = $originalSlug.'-'.$counter++;
+            }
         }
     }
 

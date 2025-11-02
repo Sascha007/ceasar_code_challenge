@@ -19,12 +19,13 @@ class TeamFactory extends Factory
      */
     public function definition(): array
     {
-        $displayName = fake()->unique()->words(2, true);
+        $displayName = fake()->words(2, true);
+        $uniqueId = substr(uniqid(), -8);
 
         return [
             'competition_id' => Competition::factory(),
-            'slug' => Str::slug($displayName).'-'.fake()->unique()->numberBetween(1000, 9999),
-            'display_name' => $displayName,
+            'slug' => Str::slug($displayName).'-'.$uniqueId,
+            'display_name' => ucfirst($displayName),
             'ready_at' => null,
             'solved_at' => null,
             'attempts' => 0,
