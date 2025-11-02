@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Submission extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'team_id',
+        'puzzle_id',
         'content',
         'is_correct',
     ];
@@ -23,6 +26,14 @@ class Submission extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Get the puzzle this submission is for.
+     */
+    public function puzzle(): BelongsTo
+    {
+        return $this->belongsTo(Puzzle::class);
     }
 
     /**

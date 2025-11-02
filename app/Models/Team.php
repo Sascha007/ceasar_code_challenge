@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Team extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'competition_id',
         'slug',
@@ -71,6 +73,18 @@ class Team extends Model
     }
 
     /**
+     * Check if the team is rate limited (too many recent submissions).
+     */
+    public function isRateLimited(int $maxAttempts = 5, int $decayMinutes = 1): bool
+    {
+        $recentSubmissions = $this->submissions()
+            ->where('created_at', '>=', now()->subMinutes($decayMinutes))
+            ->count();
+
+        return $recentSubmissions >= $maxAttempts;
+    }
+
+    /**
      * Record a solution attempt.
      */
     public function recordAttempt(string $submission): bool
@@ -95,6 +109,13 @@ class Team extends Model
             return false;
         }
 
+        // Rate limiting check
+        if ($this->isRateLimited()) {
+            \Log::debug('Team is rate limited');
+
+            return false;
+        }
+
         $isCorrect = $this->puzzle->validateSolution($submission);
         \Log::debug('Solution validation result:', [
             'submission' => $submission,
@@ -104,6 +125,7 @@ class Team extends Model
 
         try {
             $submissionModel = $this->submissions()->create([
+                'puzzle_id' => $this->puzzle->id,
                 'content' => $submission,
                 'is_correct' => $isCorrect,
             ]);

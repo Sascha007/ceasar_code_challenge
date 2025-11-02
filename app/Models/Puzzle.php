@@ -3,21 +3,34 @@
 namespace App\Models;
 
 use App\Domain\Caesar\CaesarService;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Puzzle extends Model
 {
+    use HasFactory;
+    /**
+     * Difficulty levels
+     */
+    public const DIFFICULTY_EASY = 'easy';
+    public const DIFFICULTY_MEDIUM = 'medium';
+    public const DIFFICULTY_HARD = 'hard';
+
     protected $fillable = [
         'competition_id',
         'team_id',
         'plaintext',
         'ciphertext',
         'shift',
+        'difficulty',
+        'points',
     ];
 
     protected $casts = [
         'shift' => 'integer',
+        'points' => 'integer',
     ];
 
     /**
@@ -34,6 +47,14 @@ class Puzzle extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Get all submissions for this puzzle.
+     */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
     }
 
     /**
