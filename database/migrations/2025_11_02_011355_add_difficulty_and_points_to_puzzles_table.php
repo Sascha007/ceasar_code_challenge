@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('puzzles', function (Blueprint $table) {
             $table->string('difficulty')->default('medium')->after('shift');
-            $table->integer('points')->unsigned()->default(100)->after('difficulty');
+            $table->unsignedInteger('points')->default(100)->after('difficulty');
         });
     }
 

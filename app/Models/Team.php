@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Log;
 
 class Team extends Model
 {
@@ -93,32 +94,32 @@ class Team extends Model
         $this->loadMissing(['competition', 'puzzle']);
 
         if ($this->isSolved()) {
-            \Log::debug('Team is already solved');
+            Log::debug('Team is already solved');
 
             return false;
         }
 
         if ($this->competition->refresh()->status !== Competition::STATUS_RUNNING) {
-            \Log::debug('Competition status is not running: '.$this->competition->status);
+            Log::debug('Competition status is not running: '.$this->competition->status);
 
             return false;
         }
 
         if (! $this->puzzle) {
-            \Log::debug('No puzzle found for team');
+            Log::debug('No puzzle found for team');
 
             return false;
         }
 
         // Rate limiting check
         if ($this->isRateLimited()) {
-            \Log::debug('Team is rate limited');
+            Log::debug('Team is rate limited');
 
             return false;
         }
 
         $isCorrect = $this->puzzle->validateSolution($submission);
-        \Log::debug('Solution validation result:', [
+        Log::debug('Solution validation result:', [
             'submission' => $submission,
             'isCorrect' => $isCorrect,
             'plaintext' => $this->puzzle->plaintext,
@@ -140,7 +141,7 @@ class Team extends Model
 
             return true;
         } catch (\Exception $e) {
-            \Log::error('Failed to create submission: '.$e->getMessage());
+            Log::error('Failed to create submission: '.$e->getMessage());
 
             return false;
         }
