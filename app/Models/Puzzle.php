@@ -11,11 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Puzzle extends Model
 {
     use HasFactory;
+
     /**
      * Difficulty levels
      */
     public const DIFFICULTY_EASY = 'easy';
+
     public const DIFFICULTY_MEDIUM = 'medium';
+
     public const DIFFICULTY_HARD = 'hard';
 
     protected $fillable = [

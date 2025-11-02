@@ -59,7 +59,7 @@ class SubmissionTest extends TestCase
         $correctSubmissions = Submission::correct()->get();
 
         $this->assertCount(3, $correctSubmissions);
-        $this->assertTrue($correctSubmissions->every(fn($s) => $s->is_correct));
+        $this->assertTrue($correctSubmissions->every(fn ($s) => $s->is_correct));
     }
 
     public function test_incorrect_scope_filters_incorrect_submissions(): void
@@ -70,6 +70,6 @@ class SubmissionTest extends TestCase
         $incorrectSubmissions = Submission::incorrect()->get();
 
         $this->assertCount(2, $incorrectSubmissions);
-        $this->assertTrue($incorrectSubmissions->every(fn($s) => !$s->is_correct));
+        $this->assertTrue($incorrectSubmissions->every(fn ($s) => ! $s->is_correct));
     }
 }

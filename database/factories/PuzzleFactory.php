@@ -23,7 +23,7 @@ class PuzzleFactory extends Factory
         $plaintext = fake()->sentence(5);
         $shift = fake()->numberBetween(1, 25);
         $caesarService = new CaesarService;
-        
+
         return [
             'competition_id' => Competition::factory(),
             'team_id' => null,
@@ -53,6 +53,7 @@ class PuzzleFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($shift) {
             $caesarService = new CaesarService;
+
             return [
                 'shift' => $shift,
                 'ciphertext' => $caesarService->encode($attributes['plaintext'], $shift),
@@ -67,6 +68,7 @@ class PuzzleFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($plaintext) {
             $caesarService = new CaesarService;
+
             return [
                 'plaintext' => $plaintext,
                 'ciphertext' => $caesarService->encode($plaintext, $attributes['shift']),

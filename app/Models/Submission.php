@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Submission extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'team_id',
         'puzzle_id',

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Team extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'competition_id',
         'slug',
