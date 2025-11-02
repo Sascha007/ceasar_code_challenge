@@ -5,13 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Team;
 use App\Services\QrCodeService;
-use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
     protected QrCodeService $qrCodeService;
 
-    public function __construct(QrCodeService $qrCodeService) 
+    public function __construct(QrCodeService $qrCodeService)
     {
         $this->qrCodeService = $qrCodeService;
     }
@@ -31,11 +30,11 @@ class AdminController extends Controller
     {
         $teams = Team::all();
         $qrCodes = [];
-        
+
         foreach ($teams as $team) {
             $qrCodes[] = [
                 'name' => $team->name,
-                'qr' => $this->qrCodeService->generateTeamQr($team)
+                'qr' => $this->qrCodeService->generateTeamQr($team),
             ];
         }
 

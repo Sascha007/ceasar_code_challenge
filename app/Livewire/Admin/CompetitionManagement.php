@@ -3,15 +3,19 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Competition;
-use Livewire\Component;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class CompetitionManagement extends Component
 {
     public $competitions;
+
     public $selectedCompetition = null;
+
     public $showModal = false;
+
     public $showDeleteModal = false;
+
     public $competitionToDelete = null;
 
     #[Validate('required|string|max:255')]

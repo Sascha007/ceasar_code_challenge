@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Competition extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name',
         'status',
@@ -25,8 +26,11 @@ class Competition extends Model
      * The possible statuses for a competition.
      */
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_READY = 'ready';
+
     public const STATUS_RUNNING = 'running';
+
     public const STATUS_FINISHED = 'finished';
 
     /**
@@ -58,13 +62,13 @@ class Competition extends Model
      */
     public function start(): bool
     {
-        if (!$this->canStart()) {
+        if (! $this->canStart()) {
             return false;
         }
 
         $started = $this->update([
             'status' => self::STATUS_RUNNING,
-            'started_at' => now()
+            'started_at' => now(),
         ]);
 
         if ($started) {
@@ -85,7 +89,7 @@ class Competition extends Model
 
         return $this->update([
             'status' => self::STATUS_FINISHED,
-            'finished_at' => now()
+            'finished_at' => now(),
         ]);
     }
 
@@ -95,7 +99,8 @@ class Competition extends Model
     public function checkAllTeamsSolved(): bool
     {
         if ($this->status !== self::STATUS_RUNNING) {
-            \Log::debug('Competition not running, status: ' . $this->status);
+            \Log::debug('Competition not running, status: '.$this->status);
+
             return false;
         }
 
@@ -104,7 +109,7 @@ class Competition extends Model
 
         \Log::debug('Checking teams solved status', [
             'total' => $totalTeams,
-            'solved' => $solvedTeams
+            'solved' => $solvedTeams,
         ]);
 
         $allSolved = ($totalTeams > 0 && $totalTeams === $solvedTeams);

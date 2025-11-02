@@ -12,7 +12,7 @@ class CaesarService
             $shift += 26;
         }
 
-        return preg_replace_callback('/[A-Za-z]/', function($matches) use ($shift) {
+        return preg_replace_callback('/[A-Za-z]/', function ($matches) use ($shift) {
             $char = $matches[0];
             $ascii = ord($char);
             $isUpperCase = ctype_upper($char);
