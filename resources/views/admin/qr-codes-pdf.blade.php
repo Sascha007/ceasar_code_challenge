@@ -43,13 +43,13 @@
 </head>
 <body>
     <div class="grid">
-        @foreach($qrCodes as $qrCode)
+        @foreach($teams ?? $qrCodes ?? [] as $qrCode)
             <div class="team-card">
                 <div class="team-name">{{ $qrCode['name'] }}</div>
                 <div class="qr-code">
                     {!! $qrCode['qr'] !!}
                 </div>
-                <div class="team-url">{{ $team['url'] }}</div>
+                <div class="team-url">{{ $qrCode['url'] }}</div>
             </div>
             @if($loop->iteration % 6 == 0 && !$loop->last)
                 </div>

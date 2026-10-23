@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Domain\Caesar\CaesarService;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Puzzle extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'competition_id',
         'team_id',
