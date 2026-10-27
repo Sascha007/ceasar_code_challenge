@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    groups: { kleine-aenderungen: { update-types: [minor, patch] } }
+    ignore:
+      # Major-Upgrades der Runtime-Frameworks nur bewusst/manuell
+      - dependency-name: laravel/framework
+        update-types: ["version-update:semver-major"]
+      - dependency-name: livewire/livewire
+        update-types: ["version-update:semver-major"]
+      - dependency-name: livewire/volt
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    groups: { kleine-aenderungen: { update-types: [minor, patch] } }
+    ignore:
+      - dependency-name: vue
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    groups: { kleine-aenderungen: { update-types: [minor, patch] } }
