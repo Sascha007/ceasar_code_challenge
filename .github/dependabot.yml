@@ -12,6 +12,9 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: livewire/volt
         update-types: ["version-update:semver-major"]
+      # v6 ist API-inkompatibel (CI rot in #15), Migration bewusst zurueckgestellt
+      - dependency-name: chillerlan/php-qrcode
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /
@@ -19,6 +22,9 @@ updates:
     groups: { kleine-aenderungen: { update-types: [minor, patch] } }
     ignore:
       - dependency-name: vue
+        update-types: ["version-update:semver-major"]
+      # Tailwind 4 erfordert Migration (@tailwindcss/postcss, Config), CI rot in #18
+      - dependency-name: tailwindcss
         update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
