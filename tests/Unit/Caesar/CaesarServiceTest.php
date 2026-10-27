@@ -3,6 +3,7 @@
 namespace Tests\Unit\Caesar;
 
 use App\Domain\Caesar\CaesarService;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class CaesarServiceTest extends TestCase
@@ -15,9 +16,7 @@ class CaesarServiceTest extends TestCase
         $this->service = new CaesarService;
     }
 
-    /**
-     * @dataProvider encodeDataProvider
-     */
+    #[DataProvider('encodeDataProvider')]
     public function test_encode_correctly_shifts_text(
         string $input,
         int $shift,
@@ -68,9 +67,7 @@ class CaesarServiceTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider validateDataProvider
-     */
+    #[DataProvider('validateDataProvider')]
     public function test_validate_correctly_checks_solution(
         string $submission,
         string $expected,
