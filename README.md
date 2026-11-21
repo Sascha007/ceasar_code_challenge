@@ -4,7 +4,7 @@ Ein Laravel-basiertes System für interaktive Caesar-Verschlüsselungs-Wettbewer
 
 ## Systemanforderungen
 
-- PHP 8.2+ (8.3 empfohlen)
+- PHP 8.4+
 - Erforderliche PHP-Erweiterungen:
   - ext-pdo
   - ext-pdo_sqlite (oder mysql/pgsql)
